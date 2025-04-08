@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absensi Kehadiran</title>
+  <style>
+    :root {
+      --primary: #007bff;
+      --secondary: #f8f9fa;
+      --text-color: #333;
+      --button-hover: #0056b3;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #ffffff, #e3f2fd);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: var(--text-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .absensi-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.1);
+      max-width: 600px;
+      width: 100%;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .back-btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+      background-color: var(--button-hover);
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(0, 123, 255, 0.6);
+    }
+
+    .timer {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .absensi-card h1 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .absensi-info {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .absensi-info strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #0056b3;
+    }
+
+    .absensi-card p {
+      margin-top: 1rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    
+    .info-waktu {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-box {
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  box-shadow: 0 4px 8px rgba(0, 89, 153, 0.1);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.kegiatan-box {
+  background-color: #e3f2fd;
+  border-left: 5px solid #1976d2;
+  color: #0d47a1;
+}
+
+.absen-box {
+  background-color: #e8f3f5;
+  border-left: 5px solid #24a6c8;
+  color: #348d93;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+    .selisih-waktu {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #555;
+      text-align: center;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .buttons a {
+      background-color: var(--primary);
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+      text-align: center;
+    }
+
+    .buttons a:hover {
+      background-color: var(--button-hover);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+    }
+
+    @media (min-width: 480px) {
+      .top-bar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .buttons {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .buttons a {
+        width: 48%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="absensi-card">
+    <div class="top-bar">
+      <button class="back-btn" onclick="location.href='weblogin.html'">← Kembali</button>
+      <div class="timer" id="timer">Memuat waktu...</div>
+    </div>
+
+    <h1>Absensi Kehadiran</h1>
+    <div class="absensi-info">
+      <strong>Kegiatan:</strong> Pelatihan Kepegawaian<br>
+      <strong>Lokasi:</strong> Aula Gedung A<br>
+      <p><strong>Tanggal:</strong> <span id="tanggal-kegiatan"></span></p>
+    </div>
+   <div class="info-waktu">
+   <div id="selisih-kegiatan" class="info-box kegiatan-box"></div>
+   <div id="selisih-absen" class="info-box absen-box"></div>
+   </div>
+
+    <p>Silakan pilih status kehadiran Anda untuk kegiatan ini.</p>
+    <div class="buttons">
+      <a href="#" id="hadir-btn" target="_blank">Hadir</a>
+      <a href="https://forms.gle/41gcGbbab8Mq3mHp6" target="_blank">Izin Tidak Hadir</a>
+    </div>
+  </div>
+
+  <script>
+  // Tanggal kegiatan dan tanggal absen dibuka (bisa beda)
+  const tanggalKegiatan = new Date("2025-04-27T08:00:00");
+  // Format tanggal kegiatan ke bahasa Indonesia
+const opsiFormat = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+const teksTanggal = tanggalKegiatan.toLocaleDateString('id-ID', opsiFormat);
+
+// Masukkan ke elemen HTML
+document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
+
+  const tanggalAbsenDibuka = new Date("2025-04-24T06:00:00");
+  const sekarang = new Date();
+
+  // Target URL
+  const urlGForm = "https://docs.google.com/forms/d/1so9fEytE9HHq-3zwNHAKbpdAGM3gDB0oNzReUWZ-soI/edit?usp=drivesdk&chromeless=1";
+  const urlBelumWaktu = "absennotfound.html";
+
+  // Tombol hadir
+  const hadirBtn = document.getElementById("hadir-btn");
+  if (sekarang >= tanggalAbsenDibuka) {
+    hadirBtn.href = urlGForm;
+  } else {
+    hadirBtn.href = urlBelumWaktu;
+  }
+
+  // Selisih kegiatan
+  const selisihKegiatan = Math.ceil((tanggalKegiatan - sekarang) / (1000 * 60 * 60 * 24));
+  const teksKegiatan = document.getElementById("selisih-kegiatan");
+
+  if (selisihKegiatan > 0) {
+    teksKegiatan.innerText = `Kegiatan dimulai dalam ${selisihKegiatan} hari lagi.`;
+  } else if (selisihKegiatan === 0) {
+    teksKegiatan.innerText = `Kegiatan berlangsung hari ini.`;
+  } else {
+    teksKegiatan.innerText = `Kegiatan sudah lewat ${Math.abs(selisihKegiatan)} hari yang lalu.`;
+  }
+
+  // Selisih absen
+  const selisihAbsen = Math.ceil((tanggalAbsenDibuka - sekarang) / (1000 * 60 * 60 * 24));
+  const teksAbsen = document.getElementById("selisih-absen");
+
+  if (selisihAbsen > 0) {
+    teksAbsen.innerText = `Absen dibuka dalam ${selisihAbsen} hari lagi.`;
+  } else if (selisihAbsen === 0) {
+    teksAbsen.innerText = `Absen dibuka hari ini.`;
+  } else {
+    teksAbsen.innerText = `Absen sudah dibuka ${Math.abs(selisihAbsen)} hari yang lalu.`;
+  }
+
+  // Timer real-time
+  function updateTimer() {
+    const now = new Date();
+    const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+    const tanggal = now.getDate().toString().padStart(2, '0');
+    const bulan = now.toLocaleDateString('id-ID', { month: 'long' });
+    const tahun = now.getFullYear();
+    const jam = now.getHours().toString().padStart(2, '0');
+    const menit = now.getMinutes().toString().padStart(2, '0');
+    const detik = now.getSeconds().toString().padStart(2, '0');
+
+    document.getElementById("timer").innerText =
+      `${hari}, ${tanggal} ${bulan} ${tahun} - ${jam}:${menit}:${detik}`;
+  }
+
+  setInterval(updateTimer, 1000);
+  updateTimer();
+</script>
+</body>
+</html>
