@@ -105,7 +105,7 @@
       <label>Nama</label>
       <input type="text" name="nama" required>
 
-      <label>NIA</label>
+      <label>NIA (SS-0000)</label>
       <input type="text" name="nia" required>
 
       <label>Nomor WhatsApp</label>
@@ -127,29 +127,35 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
 
     document.getElementById('absenForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      const form = new FormData(this);
-      const data = {
-        nama: form.get('nama'),
-        nia: form.get('nia'),
-        wa: form.get('wa'),
-        kegiatan: form.get('kegiatan')
-      };
+  e.preventDefault();
+  const pesan = document.getElementById('pesan');
+  pesan.style.color = 'orange';
+  pesan.textContent = "Mengirim...";
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-      .then(response => response.text())
-      .then(result => {
-        document.getElementById('pesan').textContent = "Data berhasil dikirim!";
-        document.getElementById('absenForm').reset();
-      })
-      .catch(error => {
-        document.getElementById('pesan').textContent = "Gagal mengirim data.";
-        console.error('Error!', error.message);
-      });
-    });
+  const form = new FormData(this);
+  const data = {
+    nama: form.get('nama'),
+    nia: form.get('nia'),
+    wa: form.get('wa'),
+    kegiatan: form.get('kegiatan')
+  };
+
+  fetch(scriptURL, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+  .then(response => response.text())
+  .then(result => {
+    pesan.style.color = 'green';
+    pesan.textContent = "Data berhasil dikirim!";
+    document.getElementById('absenForm').reset();
+  })
+  .catch(error => {
+    pesan.style.color = 'red';
+    pesan.textContent = "Gagal mengirim data.";
+    console.error('Error!', error.message);
+  });
+});
   </script>
 </body>
 </html>
