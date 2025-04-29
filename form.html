@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulir Absensi</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2b7de9;
+    }
+
+    label {
+      font-weight: 600;
+      margin-top: 15px;
+      display: block;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 25px;
+      background: #2b7de9;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #1865d8;
+    }
+
+    #pesan {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: 600;
+      color: green;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px;
+        border-radius: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Formulir Absensi</h2>
+    <form id="absenForm">
+      <label>Nama</label>
+      <input type="text" name="nama" required>
+
+      <label>NIA</label>
+      <input type="text" name="nia" required>
+
+      <label>Nomor WhatsApp</label>
+      <input type="text" name="wa" required>
+
+      <label>Kegiatan yang Anda hadiri</label>
+      <select name="kegiatan" required>
+        <option value="">-- Pilih Salah Satu --</option>
+        <option value="JPL 18 Pasar Minggu">JPL 18 Pasar Minggu</option>
+        <option value="JPL 251 Citayam">JPL 251 Citayam</option>
+      </select>
+
+      <button type="submit">Kirim</button>
+    </form>
+    <p id="pesan"></p>
+  </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
+
+    document.getElementById('absenForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const form = new FormData(this);
+      const data = {
+        nama: form.get('nama'),
+        nia: form.get('nia'),
+        wa: form.get('wa'),
+        kegiatan: form.get('kegiatan')
+      };
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+      .then(response => response.text())
+      .then(result => {
+        document.getElementById('pesan').textContent = "Data berhasil dikirim!";
+        document.getElementById('absenForm').reset();
+      })
+      .catch(error => {
+        document.getElementById('pesan').textContent = "Gagal mengirim data.";
+        console.error('Error!', error.message);
+      });
+    });
+  </script>
+</body>
+</html>
