@@ -224,7 +224,7 @@ const teksTanggal = tanggalKegiatan.toLocaleDateString('id-ID', opsiFormat);
 // Masukkan ke elemen HTML
 document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
 
-  const tanggalAbsenDibuka = new Date("2025-05-05T06:00:00");
+  const tanggalAbsenDibuka = new Date("2025-05-03T15:00:00");
   const sekarang = new Date();
 
   // Target URL
@@ -252,16 +252,32 @@ document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
   }
 
   // Selisih absen
-  const selisihAbsen = Math.ceil((tanggalAbsenDibuka - sekarang) / (1000 * 60 * 60 * 24));
-  const teksAbsen = document.getElementById("selisih-absen");
+const teksAbsen = document.getElementById("selisih-absen");
 
-  if (selisihAbsen > 0) {
-    teksAbsen.innerText = `Absen dibuka dalam ${selisihAbsen} hari lagi.`;
-  } else if (selisihAbsen === 0) {
-    teksAbsen.innerText = `Absen dibuka hari ini.`;
+function updateStatusAbsen() {
+  const sekarang = new Date();
+  const selisihMs = tanggalAbsenDibuka - sekarang;
+
+  if (selisihMs > 0) {
+    const selisihHari = Math.floor(selisihMs / (1000 * 60 * 60 * 24));
+
+    if (selisihHari >= 1) {
+      teksAbsen.innerText = `Absen dibuka dalam ${selisihHari} hari lagi.`;
+    } else {
+      const jam = Math.floor(selisihMs / (1000 * 60 * 60));
+      const menit = Math.floor((selisihMs % (1000 * 60 * 60)) / (1000 * 60));
+      teksAbsen.innerText = `Absen dibuka dalam ${jam} jam ${menit} menit lagi.`;
+    }
+
+    hadirBtn.href = urlBelumWaktu;
   } else {
-    teksAbsen.innerText = `Absen sudah dibuka ${Math.abs(selisihAbsen)} hari yang lalu.`;
+    teksAbsen.innerText = `Absen sudah dibuka.`;
+    hadirBtn.href = urlGForm;
   }
+}
+
+setInterval(updateStatusAbsen, 1000);
+updateStatusAbsen();
 
   // Timer real-time
   function updateTimer() {
