@@ -2,160 +2,300 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Formulir Absensi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absensi Kehadiran</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --primary: #007bff;
+      --secondary: #f8f9fa;
+      --text-color: #333;
+      --button-hover: #0056b3;
     }
 
     body {
-      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 0;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #ffffff, #e3f2fd);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      color: var(--text-color);
       display: flex;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
+      padding: 20px;
     }
 
-    .container {
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .absensi-card {
       background: white;
-      padding: 30px;
+      padding: 2rem;
       border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 8px 20px rgba(0, 123, 255, 0.1);
+      max-width: 600px;
       width: 100%;
-      max-width: 420px;
+      animation: fadeIn 0.8s ease-in-out;
     }
 
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #2b7de9;
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
     }
 
-    label {
-      font-weight: 600;
-      margin-top: 15px;
-      display: block;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 25px;
-      background: #2b7de9;
+    .back-btn {
+      background-color: var(--primary);
       color: white;
       border: none;
-      border-radius: 10px;
-      font-size: 16px;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
       font-weight: bold;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
     }
 
-    button:hover {
-      background: #1865d8;
+    .back-btn:hover {
+      background-color: var(--button-hover);
+      transform: scale(1.05);
+      box-shadow: 0 0 12px rgba(0, 123, 255, 0.6);
     }
 
-    #pesan {
+    .timer {
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .absensi-card h1 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
       text-align: center;
-      margin-top: 20px;
-      font-weight: 600;
-      color: green;
     }
 
-    @media (max-width: 480px) {
-      .container {
-        padding: 20px;
-        border-radius: 12px;
+    .absensi-info {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .absensi-info strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #0056b3;
+    }
+
+    .absensi-card p {
+      margin-top: 1rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    
+    .info-waktu {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-box {
+  padding: 1rem 1.25rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  box-shadow: 0 4px 8px rgba(0, 89, 153, 0.1);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+.kegiatan-box {
+  background-color: #e3f2fd;
+  border-left: 5px solid #1976d2;
+  color: #0d47a1;
+}
+
+.absen-box {
+  background-color: #e8f3f5;
+  border-left: 5px solid #24a6c8;
+  color: #348d93;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+    .selisih-waktu {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #555;
+      text-align: center;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .buttons a {
+      background-color: var(--primary);
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+      text-align: center;
+    }
+
+    .buttons a:hover {
+      background-color: var(--button-hover);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+    }
+
+    @media (min-width: 480px) {
+      .top-bar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .buttons {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .buttons a {
+        width: 48%;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-  <a href="index.html" style="
-    display: inline-block;
-    background: white;
-    color: #2b7de9;
-    border: 1.5px solid #2b7de9;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    margin-bottom: 10px;
-  " onmouseover="this.style.background='#2b7de9';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#2b7de9'">
-    ← Kembali
-  </a>
+  <div class="absensi-card">
+    <div class="top-bar">
+      <button class="back-btn" onclick="location.href='https://sadulursepoorid.github.io/Sadulursepoorid/weblogin333.html'">← Web Utama</button>
+      <div class="timer" id="timer">Memuat waktu...</div>
+    </div>
 
-  <h2>Formulir Absensi</h2>
-    <form id="absenForm">
-      <label>Nama</label>
-      <input type="text" name="nama" required>
+    <h1>Absensi Kehadiran</h1>
+    <div class="absensi-info">
+      <strong>Kegiatan:</strong>Kunjungan & Edukasi<br>
+      <br>
+      <strong>Lokasi:</strong>Depo LRT Jabodebek<br>
+      <p><strong>Tanggal:</strong> <span id="tanggal-kegiatan"></span></p>
+    </div>
+   <div class="info-waktu">
+   <div id="selisih-kegiatan" class="info-box kegiatan-box"></div>
+   <div id="selisih-absen" class="info-box absen-box"></div>
+   </div>
 
-      <label>NIA</label>
-      <input type="text" name="nia" required>
-
-      <label>Nomor WhatsApp</label>
-      <input type="text" name="wa" required>
-
-      <label>Kegiatan yang Anda hadiri</label>
-      <select name="kegiatan" required>
-        <option value="">-- Pilih Salah Satu --</option>
-        <option value="Depo LRT Jabodebek">Depo LRT Jabodebek</option>
-        <option value="JPL 251 Citayam">JPL 251 Citayam</option>
-      </select>
-
-      <button type="submit">Kirim</button>
-    </form>
-    <p id="pesan"></p>
+    <p>Silakan pilih status kehadiran Anda untuk kegiatan ini.</p>
+    <div class="buttons">
+      <a href="#" id="hadir-btn" target="_blank">Hadir</a>
+      <a href="izin.html" target="_blank">Izin Tidak Hadir</a>
+    </div>
   </div>
 
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
+  // Tanggal kegiatan dan tanggal absen dibuka (bisa beda)
+  const tanggalKegiatan = new Date("2025-05-24T08:00:00");
+  // Format tanggal kegiatan ke bahasa Indonesia
+const opsiFormat = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+const teksTanggal = tanggalKegiatan.toLocaleDateString('id-ID', opsiFormat);
 
-    document.getElementById('absenForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const pesan = document.getElementById('pesan');
-  pesan.style.color = 'green';
-  pesan.textContent = "Mengirim...";
+// Masukkan ke elemen HTML
+document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
 
-  const form = new FormData(this);
-  const data = {
-    nama: form.get('nama'),
-    nia: form.get('nia'),
-    wa: form.get('wa'),
-    kegiatan: form.get('kegiatan')
-  };
+  const tanggalAbsenDibuka = new Date("2025-05-17T10:00:00");
+  const sekarang = new Date();
 
-  fetch(scriptURL, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  })
-  .then(response => response.text())
-  .then(result => {
-    pesan.style.color = 'green';
-    pesan.textContent = "Data berhasil dikirim!";
-    document.getElementById('absenForm').reset();
-  })
-  .catch(error => {
-    pesan.style.color = 'red';
-    pesan.textContent = "Gagal mengirim data.";
-    console.error('Error!', error.message);
-  });
-});
-  </script>
+  // Target URL
+  const urlGForm = "form2.html";
+  const urlBelumWaktu = "absennotfound.html";
+
+  // Tombol hadir
+  const hadirBtn = document.getElementById("hadir-btn");
+  if (sekarang >= tanggalAbsenDibuka) {
+    hadirBtn.href = urlGForm;
+  } else {
+    hadirBtn.href = urlBelumWaktu;
+  }
+
+  // Selisih kegiatan
+  const selisihKegiatan = Math.ceil((tanggalKegiatan - sekarang) / (1000 * 60 * 60 * 24));
+  const teksKegiatan = document.getElementById("selisih-kegiatan");
+
+  if (selisihKegiatan > 0) {
+    teksKegiatan.innerText = `Kegiatan dimulai dalam ${selisihKegiatan} hari lagi.`;
+  } else if (selisihKegiatan === 0) {
+    teksKegiatan.innerText = `Kegiatan berlangsung hari ini.`;
+  } else {
+    teksKegiatan.innerText = `Kegiatan sudah lewat ${Math.abs(selisihKegiatan)} hari yang lalu.`;
+  }
+
+  // Selisih absen
+const teksAbsen = document.getElementById("selisih-absen");
+
+function updateStatusAbsen() {
+  const sekarang = new Date();
+  const selisihMs = tanggalAbsenDibuka - sekarang;
+
+  if (selisihMs > 0) {
+    const selisihHari = Math.floor(selisihMs / (1000 * 60 * 60 * 24));
+
+    if (selisihHari >= 1) {
+      teksAbsen.innerText = `Absen dibuka dalam ${selisihHari} hari lagi.`;
+    } else {
+      const jam = Math.floor(selisihMs / (1000 * 60 * 60));
+      const menit = Math.floor((selisihMs % (1000 * 60 * 60)) / (1000 * 60));
+      teksAbsen.innerText = `Absen dibuka dalam ${jam} jam ${menit} menit lagi.`;
+    }
+
+    hadirBtn.href = urlBelumWaktu;
+  } else {
+    teksAbsen.innerText = `Absen sudah dibuka.`;
+    hadirBtn.href = urlGForm;
+  }
+}
+
+setInterval(updateStatusAbsen, 1000);
+updateStatusAbsen();
+
+  // Timer real-time
+  function updateTimer() {
+    const now = new Date();
+    const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+    const tanggal = now.getDate().toString().padStart(2, '0');
+    const bulan = now.toLocaleDateString('id-ID', { month: 'long' });
+    const tahun = now.getFullYear();
+    const jam = now.getHours().toString().padStart(2, '0');
+    const menit = now.getMinutes().toString().padStart(2, '0');
+    const detik = now.getSeconds().toString().padStart(2, '0');
+
+    document.getElementById("timer").innerText =
+      `${hari}, ${tanggal} ${bulan} ${tahun} - ${jam}:${menit}:${detik}`;
+  }
+
+  setInterval(updateTimer, 1000);
+  updateTimer();
+</script>
 </body>
 </html>
