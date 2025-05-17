@@ -158,15 +158,20 @@
       })
       .then(response => response.text())
       .then(result => {
-        if (result.toLowerCase().includes("kuota penuh")) {
-          pesan.style.color = 'red';
-          pesan.textContent = result;
-        } else {
-          pesan.style.color = 'green';
-          pesan.textContent = "Data berhasil dikirim!";
-          document.getElementById('absenForm').reset();
-        }
-      })
+  if (result.toLowerCase().includes("kuota penuh")) {
+    pesan.style.color = 'red';
+    pesan.textContent = result;
+  } else {
+    pesan.style.color = 'green';
+    pesan.textContent = "Data berhasil dikirim!";
+    
+ // Redirect ke halaman tiket
+      const ticketId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const ticketUrl = `tiket.html?nama=${encodeURIComponent(data.nama)}&nia=${encodeURIComponent(data.nia)}&wa=${encodeURIComponent(data.wa)}&komunitas=${encodeURIComponent(data.komunitas)}&kegiatan=${encodeURIComponent(data.kegiatan)}&ticketId=${ticketId}`;
+      window.location.href = ticketUrl;
+    }
+  })
+  
       .catch(error => {
         pesan.style.color = 'red';
         pesan.textContent = "Gagal mengirim data.";
