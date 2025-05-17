@@ -81,31 +81,38 @@
         border-radius: 12px;
       }
     }
+
+    .back-button {
+      display: inline-block;
+      background: white;
+      color: #2b7de9;
+      border: 1.5px solid #2b7de9;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 10px;
+    }
+
+    .back-button:hover {
+      background: #2b7de9;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-  <a href="index.html" style="
-    display: inline-block;
-    background: white;
-    color: #2b7de9;
-    border: 1.5px solid #2b7de9;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    margin-bottom: 10px;
-  " onmouseover="this.style.background='#2b7de9';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#2b7de9'">
-    ← Kembali
-  </a>
+    <a href="index.html" class="back-button" onmouseover="this.style.background='#2b7de9';this.style.color='white'" onmouseout="this.style.background='white';this.style.color='#2b7de9'">
+      ← Kembali
+    </a>
 
-  <h2>Formulir Absensi</h2>
+    <h2>Formulir Absensi</h2>
     <form id="absenForm">
       <label>Nama</label>
       <input type="text" name="nama" required>
 
-      <label>NIA (SS-0000)</label>
+      <label>NIA</label>
       <input type="text" name="nia" required>
 
       <label>Nomor WhatsApp</label>
@@ -114,7 +121,6 @@
       <label>Kegiatan yang Anda hadiri</label>
       <select name="kegiatan" required>
         <option value="">-- Pilih Salah Satu --</option>
-        <option value="JPL 18 Pasar Minggu">JPL 18 Pasar Minggu</option>
         <option value="JPL 251 Citayam">JPL 251 Citayam</option>
       </select>
 
@@ -127,35 +133,42 @@
     const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
 
     document.getElementById('absenForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const pesan = document.getElementById('pesan');
-  pesan.style.color = 'orange';
-  pesan.textContent = "Mengirim...";
+      e.preventDefault();
+      const pesan = document.getElementById('pesan');
+      pesan.style.color = 'green';
+      pesan.textContent = "Mengirim...";
 
-  const form = new FormData(this);
-  const data = {
-    nama: form.get('nama'),
-    nia: form.get('nia'),
-    wa: form.get('wa'),
-    kegiatan: form.get('kegiatan')
-  };
+      const form = new FormData(this);
+      const data = {
+        nama: form.get('nama'),
+        nia: form.get('nia'),
+        wa: form.get('wa'),
+        kegiatan: form.get('kegiatan')
+      };
 
-  fetch(scriptURL, {
-    method: 'POST',
-    body: JSON.stringify(data)
-  })
-  .then(response => response.text())
-  .then(result => {
-    pesan.style.color = 'green';
-    pesan.textContent = "Data berhasil dikirim!";
-    document.getElementById('absenForm').reset();
-  })
-  .catch(error => {
-    pesan.style.color = 'red';
-    pesan.textContent = "Gagal mengirim data.";
-    console.error('Error!', error.message);
-  });
-});
+      // Simpan data di localStorage untuk halaman QR
+      localStorage.setItem('formData', JSON.stringify(data));
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+      .then(response => response.text())
+      .then(result => {
+        pesan.style.color = 'green';
+        pesan.textContent = "Data berhasil dikirim!";
+        
+        // Redirect ke halaman QR Code
+        setTimeout(() => {
+          window.location.href = 'barcode.html';
+        }, 1000);
+      })
+      .catch(error => {
+        pesan.style.color = 'red';
+        pesan.textContent = "Gagal mengirim data.";
+        console.error('Error!', error.message);
+      });
+    });
   </script>
 </body>
 </html>
