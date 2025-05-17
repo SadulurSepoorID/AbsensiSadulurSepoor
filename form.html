@@ -75,6 +75,12 @@
       color: green;
     }
 
+    .format-info {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
     @media (max-width: 480px) {
       .container {
         padding: 20px;
@@ -113,10 +119,12 @@
       <input type="text" name="nama" required>
 
       <label>NIA</label>
-      <input type="text" name="nia" required>
+      <input type="text" name="nia" id="nia" required>
+      <div class="format-info">Contoh: SS-0000</div>
 
       <label>Nomor WhatsApp</label>
-      <input type="text" name="wa" required>
+      <input type="text" name="wa" id="wa" required>
+      <div class="format-info">Contoh: 628xxx</div>
 
       <label>Kegiatan yang Anda hadiri</label>
       <select name="kegiatan" required>
@@ -131,12 +139,69 @@
 
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
+    
+    // Format NIA menjadi SS-0000
+    document.getElementById('nia').addEventListener('blur', function() {
+      let value = this.value.trim();
+      
+      // Hapus format "SS-" jika sudah ada
+      if (value.toUpperCase().startsWith('SS-')) {
+        value = value.substring(3);
+      }
+      
+      // Hapus semua karakter non-angka
+      value = value.replace(/\D/g, '');
+      
+      // Format menjadi SS-0000
+      if (value) {
+        this.value = 'SS-' + value.padStart(4, '0');
+      }
+    });
+    
+    // Format nomor WhatsApp menjadi 628...
+    document.getElementById('wa').addEventListener('blur', function() {
+      let value = this.value.trim();
+      
+      // Hapus semua karakter non-angka
+      value = value.replace(/\D/g, '');
+      
+      // Jika dimulai dengan 0, ganti dengan 62
+      if (value.startsWith('0')) {
+        value = '62' + value.substring(1);
+      }
+      // Jika dimulai dengan 8, tambahkan 62
+      else if (value.startsWith('8')) {
+        value = '62' + value;
+      }
+      // Jika dimulai dengan +62, hapus + dan pastikan formatnya 62
+      else if (value.startsWith('62')) {
+        value = '62' + value.substring(2);
+      }
+      
+      this.value = value;
+    });
 
     document.getElementById('absenForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const pesan = document.getElementById('pesan');
       pesan.style.color = 'green';
       pesan.textContent = "Mengirim...";
+
+      // Format sekali lagi sebelum submit
+      const niaInput = document.getElementById('nia');
+      let niaValue = niaInput.value.trim();
+      if (!niaValue.toUpperCase().startsWith('SS-')) {
+        niaValue = niaValue.replace(/\D/g, '');
+        niaInput.value = 'SS-' + niaValue.padStart(4, '0');
+      }
+      
+      const waInput = document.getElementById('wa');
+      let waValue = waInput.value.trim().replace(/\D/g, '');
+      if (waValue.startsWith('0')) {
+        waInput.value = '62' + waValue.substring(1);
+      } else if (!waValue.startsWith('62') && waValue.startsWith('8')) {
+        waInput.value = '62' + waValue;
+      }
 
       const form = new FormData(this);
       const data = {
