@@ -82,7 +82,7 @@ const validAccounts = [
 { username: "Andhika Firzatullah", kta: "0268", password: "andika644" },
 { username: "Genevie Nofell", kta: "0257", password: "genevie128" },
 { username: "Akbar Nurhidayanto", kta: "0234", password: "akbar571" },
-{ username: "Raihan Alzena", kta: "0249", password: "raihan869" },
+{ username: "Raihan Alzena", kta: "0248", password: "raihan869" },
 { username: "Indah hurun aeni", kta: "0243", password: "indah453" },
 { username: "Fahrezy Rizky Haditya", kta: "0247", password: "fahrezy220" },
 { username: "Giriyama romero", kta: "0269", password: "giriyama374" },
