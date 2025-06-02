@@ -50,6 +50,61 @@
       font-size: 15px;
     }
 
+    /* Style untuk search input */
+    .search-container {
+      position: relative;
+      width: 100%;
+    }
+
+    #namaSearch {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    .dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .dropdown-item {
+      padding: 12px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item.selected {
+      background-color: #e3f2fd;
+    }
+
+    /* Style untuk input NIA yang readonly */
+    #nia[readonly] {
+      background-color: #f8f9fa;
+      color: #666;
+    }
+
     button {
       width: 100%;
       padding: 12px;
@@ -116,11 +171,16 @@
     <h2>Formulir Absensi</h2>
     <form id="absenForm">
       <label>Nama</label>
-      <input type="text" name="nama" required>
+      <div class="search-container">
+        <input type="text" id="namaSearch" placeholder="Ketik untuk mencari nama..." autocomplete="off" required>
+        <div id="dropdownList" class="dropdown-list"></div>
+        <input type="hidden" name="nama" id="selectedNama">
+      </div>
+      <div class="format-info"></div>
 
       <label>NIA</label>
-      <input type="text" name="nia" id="nia" required>
-      <div class="format-info">Contoh: SS-0000</div>
+      <input type="text" name="nia" id="nia" readonly required>
+      <div class="format-info">Akan terisi otomatis berdasarkan nama yang dipilih</div>
 
       <label>Nomor WhatsApp</label>
       <input type="text" name="wa" id="wa" required>
@@ -129,7 +189,7 @@
       <label>Kegiatan yang Anda hadiri</label>
       <select name="kegiatan" required>
         <option value="">-- Pilih Salah Satu --</option>
-        <option value="JPL 251 Citayam">JPL 251 Citayam</option>
+        <option value="JPL 81 Bekasi">JPL 81 Bekasi</option>
       </select>
 
       <button type="submit">Kirim</button>
@@ -137,27 +197,86 @@
     <p id="pesan"></p>
   </div>
 
+  <script src="account.js"></script>
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
     
-    // Format NIA menjadi SS-0000
-    document.getElementById('nia').addEventListener('blur', function() {
-      let value = this.value.trim();
+    const namaSearch = document.getElementById('namaSearch');
+    const dropdownList = document.getElementById('dropdownList');
+    const selectedNama = document.getElementById('selectedNama');
+    const niaInput = document.getElementById('nia');
+    
+    let selectedAccount = null;
+
+    // Function untuk menampilkan dropdown
+    function showDropdown(accounts) {
+      dropdownList.innerHTML = '';
       
-      // Hapus format "SS-" jika sudah ada
-      if (value.toUpperCase().startsWith('SS-')) {
-        value = value.substring(3);
+      if (accounts.length === 0) {
+        dropdownList.innerHTML = '<div class="dropdown-item">Nama tidak ditemukan</div>';
+      } else {
+        accounts.forEach(account => {
+          const item = document.createElement('div');
+          item.className = 'dropdown-item';
+          item.textContent = account.username;
+          item.addEventListener('click', () => selectAccount(account));
+          dropdownList.appendChild(item);
+        });
       }
       
-      // Hapus semua karakter non-angka
-      value = value.replace(/\D/g, '');
+      dropdownList.style.display = 'block';
+    }
+
+    // Function untuk menyembunyikan dropdown
+    function hideDropdown() {
+      setTimeout(() => {
+        dropdownList.style.display = 'none';
+      }, 200);
+    }
+
+    // Function untuk memilih account
+    function selectAccount(account) {
+      selectedAccount = account;
+      namaSearch.value = account.username;
+      selectedNama.value = account.username;
+      niaInput.value = `SS-${account.kta.padStart(4, '0')}`;
+      dropdownList.style.display = 'none';
+    }
+
+    // Event listener untuk search input
+    namaSearch.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase().trim();
       
-      // Format menjadi SS-0000
-      if (value) {
-        this.value = 'SS-' + value.padStart(4, '0');
+      if (searchTerm === '') {
+        dropdownList.style.display = 'none';
+        selectedNama.value = '';
+        niaInput.value = '';
+        selectedAccount = null;
+        return;
+      }
+
+      // Filter accounts berdasarkan search term
+      const filteredAccounts = validAccounts.filter(account => 
+        account.username.toLowerCase().includes(searchTerm)
+      );
+
+      showDropdown(filteredAccounts);
+    });
+
+    // Event listener untuk focus
+    namaSearch.addEventListener('focus', function() {
+      if (this.value.trim() !== '') {
+        const searchTerm = this.value.toLowerCase().trim();
+        const filteredAccounts = validAccounts.filter(account => 
+          account.username.toLowerCase().includes(searchTerm)
+        );
+        showDropdown(filteredAccounts);
       }
     });
-    
+
+    // Event listener untuk blur
+    namaSearch.addEventListener('blur', hideDropdown);
+
     // Format nomor WhatsApp menjadi 628...
     document.getElementById('wa').addEventListener('blur', function() {
       let value = this.value.trim();
@@ -181,20 +300,28 @@
       this.value = value;
     });
 
+    // Close dropdown ketika klik di luar
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-container')) {
+        dropdownList.style.display = 'none';
+      }
+    });
+
     document.getElementById('absenForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      
+      // Validasi apakah nama sudah dipilih dari dropdown
+      if (!selectedAccount || selectedNama.value === '') {
+        document.getElementById('pesan').style.color = 'red';
+        document.getElementById('pesan').textContent = 'Silakan pilih nama dari daftar yang tersedia';
+        return;
+      }
+
       const pesan = document.getElementById('pesan');
       pesan.style.color = 'green';
       pesan.textContent = "Mengirim...";
 
-      // Format sekali lagi sebelum submit
-      const niaInput = document.getElementById('nia');
-      let niaValue = niaInput.value.trim();
-      if (!niaValue.toUpperCase().startsWith('SS-')) {
-        niaValue = niaValue.replace(/\D/g, '');
-        niaInput.value = 'SS-' + niaValue.padStart(4, '0');
-      }
-      
+      // Format nomor WhatsApp sekali lagi sebelum submit
       const waInput = document.getElementById('wa');
       let waValue = waInput.value.trim().replace(/\D/g, '');
       if (waValue.startsWith('0')) {
