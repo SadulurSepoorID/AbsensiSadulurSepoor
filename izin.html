@@ -35,6 +35,70 @@
     input:focus, textarea:focus, select:focus {
       border-color: #1a73e8; outline: none;
     }
+
+    /* Style untuk search input */
+    .search-container {
+      position: relative;
+      width: 100%;
+    }
+
+    #namaSearch {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    .dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      margin-bottom: 18px;
+    }
+
+    .dropdown-item {
+      padding: 12px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background-color 0.2s;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .dropdown-item.selected {
+      background-color: #e3f2fd;
+    }
+
+    /* Style untuk input NIA yang readonly */
+    #nia[readonly] {
+      background-color: #f8f9fa;
+      color: #666;
+    }
+
+    .format-info {
+      font-size: 12px;
+      color: #666;
+      margin-top: -12px;
+      margin-bottom: 18px;
+    }
+
     button {
       width: 100%; background: #1a73e8; color: white; padding: 12px;
       border: none; border-radius: 12px; font-size: 16px; font-weight: bold;
@@ -58,20 +122,26 @@
       <h2>Formulir Izin Tidak Hadir</h2>
     </div>
     <form id="izinForm">
-      <label for="nama">Nama Lengkap</label>
-      <input type="text" id="nama" name="nama" required />
+      <label for="namaSearch">Nama Lengkap</label>
+      <div class="search-container">
+        <input type="text" id="namaSearch" placeholder="Ketik untuk mencari nama..." autocomplete="off" required>
+        <div id="dropdownList" class="dropdown-list"></div>
+        <input type="hidden" name="nama" id="selectedNama">
+      </div>
+      <div class="format-info"></div>
 
-      <label for="nia">NIA (SS-0000)</label>
-      <input type="text" id="nia" name="nia" required />
+      <label for="nia">NIA</label>
+      <input type="text" id="nia" name="nia" readonly required />
+      <div class="format-info">Akan terisi otomatis berdasarkan nama yang dipilih</div>
 
       <label for="wa">Nomor WhatsApp</label>
       <input type="tel" id="wa" name="wa" required />
+      <div class="format-info">Contoh: 628xxx</div>
 
       <label for="kegiatan">Kegiatan yang Tidak Bisa Dihadiri</label>
       <select id="kegiatan" name="kegiatan" required>
         <option value="" disabled selected>Pilih salah satu</option>
-        <option value="JPL 18 Pasar Minggu">JPL 18 Pasar Minggu</option>
-        <option value="JPL 251 Citayam">JPL 251 Citayam</option>
+        <option value="JPL 81 Bekasi">JPL 81 Bekasi</option>
       </select>
 
       <label for="alasan">Alasan Tidak Hadir</label>
@@ -85,15 +155,140 @@
     <div id="msg" class="success"></div>
   </div>
 
+  <script src="account.js"></script>
   <script>
+    const namaSearch = document.getElementById('namaSearch');
+    const dropdownList = document.getElementById('dropdownList');
+    const selectedNama = document.getElementById('selectedNama');
+    const niaInput = document.getElementById('nia');
+    
+    let selectedAccount = null;
+
+    // Function untuk menampilkan dropdown
+    function showDropdown(accounts) {
+      dropdownList.innerHTML = '';
+      
+      if (accounts.length === 0) {
+        dropdownList.innerHTML = '<div class="dropdown-item">Nama tidak ditemukan</div>';
+      } else {
+        accounts.forEach(account => {
+          const item = document.createElement('div');
+          item.className = 'dropdown-item';
+          item.textContent = account.username;
+          item.addEventListener('click', () => selectAccount(account));
+          dropdownList.appendChild(item);
+        });
+      }
+      
+      dropdownList.style.display = 'block';
+    }
+
+    // Function untuk menyembunyikan dropdown
+    function hideDropdown() {
+      setTimeout(() => {
+        dropdownList.style.display = 'none';
+      }, 200);
+    }
+
+    // Function untuk memilih account
+    function selectAccount(account) {
+      selectedAccount = account;
+      namaSearch.value = account.username;
+      selectedNama.value = account.username;
+      niaInput.value = `SS-${account.kta.padStart(4, '0')}`;
+      dropdownList.style.display = 'none';
+    }
+
+    // Event listener untuk search input
+    namaSearch.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase().trim();
+      
+      if (searchTerm === '') {
+        dropdownList.style.display = 'none';
+        selectedNama.value = '';
+        niaInput.value = '';
+        selectedAccount = null;
+        return;
+      }
+
+      // Filter accounts berdasarkan search term
+      const filteredAccounts = validAccounts.filter(account => 
+        account.username.toLowerCase().includes(searchTerm)
+      );
+
+      showDropdown(filteredAccounts);
+    });
+
+    // Event listener untuk focus
+    namaSearch.addEventListener('focus', function() {
+      if (this.value.trim() !== '') {
+        const searchTerm = this.value.toLowerCase().trim();
+        const filteredAccounts = validAccounts.filter(account => 
+          account.username.toLowerCase().includes(searchTerm)
+        );
+        showDropdown(filteredAccounts);
+      }
+    });
+
+    // Event listener untuk blur
+    namaSearch.addEventListener('blur', hideDropdown);
+
+    // Format nomor WhatsApp menjadi 628...
+    document.getElementById('wa').addEventListener('blur', function() {
+      let value = this.value.trim();
+      
+      // Hapus semua karakter non-angka
+      value = value.replace(/\D/g, '');
+      
+      // Jika dimulai dengan 0, ganti dengan 62
+      if (value.startsWith('0')) {
+        value = '62' + value.substring(1);
+      }
+      // Jika dimulai dengan 8, tambahkan 62
+      else if (value.startsWith('8')) {
+        value = '62' + value;
+      }
+      // Jika dimulai dengan +62, hapus + dan pastikan formatnya 62
+      else if (value.startsWith('62')) {
+        value = '62' + value.substring(2);
+      }
+      
+      this.value = value;
+    });
+
+    // Close dropdown ketika klik di luar
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-container')) {
+        dropdownList.style.display = 'none';
+      }
+    });
+    
     const form = document.getElementById('izinForm');
     const msg = document.getElementById('msg');
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
+
+      // Validasi apakah nama sudah dipilih dari dropdown
+      if (!selectedAccount || selectedNama.value === '') {
+        msg.style.color = 'red';
+        msg.textContent = 'Silakan pilih nama dari daftar yang tersedia';
+        return;
+      }
+
+      msg.style.color = 'green';
       msg.textContent = "Mengirim...";
 
-      const nama = form.nama.value;
+      // Format nomor WhatsApp sekali lagi sebelum submit
+      const waInput = document.getElementById('wa');
+      let waValue = waInput.value.trim().replace(/\D/g, '');
+      if (waValue.startsWith('0')) {
+        waInput.value = '62' + waValue.substring(1);
+      } else if (!waValue.startsWith('62') && waValue.startsWith('8')) {
+        waInput.value = '62' + waValue;
+      }
+
+      const nama = form.selectedNama.value;
       const nia = form.nia.value;
       const wa = form.wa.value;
       const kegiatan = form.kegiatan.value;
@@ -124,10 +319,19 @@
         });
 
         const text = await response.text();
+        msg.style.color = 'green';
         msg.textContent = "Data berhasil dikirim!";
         form.reset();
+        
+        // Reset juga state search
+        selectedAccount = null;
+        selectedNama.value = '';
+        namaSearch.value = '';
+        niaInput.value = '';
+        dropdownList.style.display = 'none';
       } catch (err) {
         console.error(err);
+        msg.style.color = 'red';
         msg.textContent = "Gagal mengirim data.";
       }
     }
