@@ -105,38 +105,44 @@
     }
     
     .info-waktu {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
 
-.info-box {
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.5;
-  box-shadow: 0 4px 8px rgba(0, 89, 153, 0.1);
-  animation: fadeIn 0.4s ease-in-out;
-}
+    .info-box {
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.5;
+      box-shadow: 0 4px 8px rgba(0, 89, 153, 0.1);
+      animation: fadeIn 0.4s ease-in-out;
+    }
 
-.kegiatan-box {
-  background-color: #e3f2fd;
-  border-left: 5px solid #1976d2;
-  color: #0d47a1;
-}
+    .kegiatan-box {
+      background-color: #e3f2fd;
+      border-left: 5px solid #1976d2;
+      color: #0d47a1;
+    }
 
-.absen-box {
-  background-color: #e8f3f5;
-  border-left: 5px solid #24a6c8;
-  color: #348d93;
-}
+    .absen-box {
+      background-color: #e8f3f5;
+      border-left: 5px solid #24a6c8;
+      color: #348d93;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    .absen-box.full { /* New style for full attendance */
+      background-color: #ffebee;
+      border-left: 5px solid #f44336;
+      color: #c62828;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     .selisih-waktu {
       margin-top: 0.5rem;
@@ -168,6 +174,17 @@
       background-color: var(--button-hover);
       transform: scale(1.05);
       box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+    }
+
+    .buttons a.disabled { /* New style for disabled button */
+      background-color: #ccc;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .buttons a.disabled:hover {
+      transform: none;
+      box-shadow: none;
     }
 
     @media (min-width: 480px) {
@@ -209,20 +226,23 @@
 
     <p>Silakan pilih status kehadiran Anda untuk kegiatan ini.</p>
     <div class="buttons">
-      <a href="#" id="hadir-btn" target="_blank">Hadir</a>
+      <a href="#" id="hadir-btn">Hadir</a>
       <a href="izin.html" target="_blank">Izin Tidak Hadir</a>
     </div>
   </div>
 
   <script>
+  // GANTI URL INI DENGAN URL WEB APP GOOGLE SCRIPT ANDA
+  const scriptURL = "https://script.google.com/macros/s/AKfycbw-bLmoNPRhQAS6RX5EMS8SrYGddV_xfO_aRt2d379WxtSZkwnl-LsaCRj_pT8cK_NT/exec"; // Replace with your actual GAS Web App URL
+
   // Tanggal kegiatan dan tanggal absen dibuka (bisa beda)
   const tanggalKegiatan = new Date("2025-06-14T15:00:00");
   // Format tanggal kegiatan ke bahasa Indonesia
-const opsiFormat = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
-const teksTanggal = tanggalKegiatan.toLocaleDateString('id-ID', opsiFormat);
+  const opsiFormat = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
+  const teksTanggal = tanggalKegiatan.toLocaleDateString('id-ID', opsiFormat);
 
-// Masukkan ke elemen HTML
-document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
+  // Masukkan ke elemen HTML
+  document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
 
   const tanggalAbsenDibuka = new Date("2025-06-11T20:00:00");
   const sekarang = new Date();
@@ -233,10 +253,67 @@ document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
 
   // Tombol hadir
   const hadirBtn = document.getElementById("hadir-btn");
-  if (sekarang >= tanggalAbsenDibuka) {
-    hadirBtn.href = urlGForm;
-  } else {
-    hadirBtn.href = urlBelumWaktu;
+  const teksAbsen = document.getElementById("selisih-absen");
+
+  let isAttendanceFull = false; // Flag to track if attendance is full
+
+  // Function to check attendance status from GAS
+  async function checkAttendanceStatus() {
+    try {
+      const response = await fetch(`${scriptURL}?action=getAttendanceStatus`);
+      const data = await response.json();
+      
+      console.log("Attendance Status Data:", data);
+
+      isAttendanceFull = data.isFull;
+
+      updateStatusAbsen(); // Update UI based on time and attendance full status
+    } catch (error) {
+      console.error('Error fetching attendance status:', error);
+      // Fallback: If there's an error, assume it's not full to allow access
+      isAttendanceFull = false; 
+      updateStatusAbsen();
+    }
+  }
+
+  function updateStatusAbsen() {
+    const now = new Date();
+    const selisihMs = tanggalAbsenDibuka - now;
+
+    if (now < tanggalAbsenDibuka) {
+      // Absen belum dibuka
+      if (selisihMs > 0) {
+        const selisihHari = Math.floor(selisihMs / (1000 * 60 * 60 * 24));
+
+        if (selisihHari >= 1) {
+          teksAbsen.innerText = `Absen dibuka dalam ${selisihHari} hari lagi.`;
+        } else {
+          const jam = Math.floor(selisihMs / (1000 * 60 * 60));
+          const menit = Math.floor((selisihMs % (1000 * 60 * 60)) / (1000 * 60));
+          const detik = Math.floor((selisihMs % (1000 * 60)) / 1000);
+          teksAbsen.innerText = `Absen dibuka dalam ${jam} jam ${menit} menit ${detik} detik lagi.`;
+        }
+      }
+      hadirBtn.href = urlBelumWaktu;
+      hadirBtn.classList.remove('disabled'); // Ensure it's not disabled by full status if not yet open
+      teksAbsen.classList.remove('full');
+      hadirBtn.style.pointerEvents = ''; // Enable clicks
+    } else {
+      // Absen sudah dibuka (or passed)
+      if (isAttendanceFull) {
+        teksAbsen.innerText = `Absen PENUH!`;
+        teksAbsen.classList.add('full');
+        hadirBtn.href = "#"; // Prevent navigation
+        hadirBtn.classList.add('disabled');
+        hadirBtn.style.pointerEvents = 'none'; // Disable clicks
+      } else {
+        teksAbsen.innerText = `Absen sudah dibuka.`;
+        teksAbsen.classList.remove('full');
+        hadirBtn.href = urlGForm;
+        hadirBtn.classList.remove('disabled');
+        hadirBtn.style.pointerEvents = ''; // Enable clicks
+      }
+    }
   }
 
   // Selisih kegiatan
@@ -251,33 +328,10 @@ document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
     teksKegiatan.innerText = `Kegiatan sudah lewat ${Math.abs(selisihKegiatan)} hari yang lalu.`;
   }
 
-  // Selisih absen
-const teksAbsen = document.getElementById("selisih-absen");
-
-function updateStatusAbsen() {
-  const sekarang = new Date();
-  const selisihMs = tanggalAbsenDibuka - sekarang;
-
-  if (selisihMs > 0) {
-    const selisihHari = Math.floor(selisihMs / (1000 * 60 * 60 * 24));
-
-    if (selisihHari >= 1) {
-      teksAbsen.innerText = `Absen dibuka dalam ${selisihHari} hari lagi.`;
-    } else {
-      const jam = Math.floor(selisihMs / (1000 * 60 * 60));
-      const menit = Math.floor((selisihMs % (1000 * 60 * 60)) / (1000 * 60));
-      teksAbsen.innerText = `Absen dibuka dalam ${jam} jam ${menit} menit lagi.`;
-    }
-
-    hadirBtn.href = urlBelumWaktu;
-  } else {
-    teksAbsen.innerText = `Absen sudah dibuka.`;
-    hadirBtn.href = urlGForm;
-  }
-}
-
-setInterval(updateStatusAbsen, 1000);
-updateStatusAbsen();
+  // Initial check and periodic updates
+  checkAttendanceStatus(); // Check on page load
+  setInterval(checkAttendanceStatus, 5000); // Check every 5 seconds for full status
+  setInterval(updateStatusAbsen, 1000); // Update every second for countdown
 
   // Timer real-time
   function updateTimer() {
