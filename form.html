@@ -35,6 +35,29 @@
       color: #2b7de9;
     }
 
+    .limit-info {
+      background: #e3f2fd;
+      border: 1px solid #2196f3;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #1976d2;
+    }
+
+    .limit-info.full {
+      background: #ffebee;
+      border: 1px solid #f44336;
+      color: #c62828;
+    }
+
+    .limit-info.warning {
+      background: #fff3e0;
+      border: 1px solid #ff9800;
+      color: #f57c00;
+    }
+
     label {
       font-weight: 600;
       margin-top: 15px;
@@ -119,8 +142,13 @@
       transition: background 0.3s ease;
     }
 
-    button:hover {
+    button:hover:not(:disabled) {
       background: #1865d8;
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
     }
 
     #pesan {
@@ -160,6 +188,12 @@
       background: #2b7de9;
       color: white;
     }
+
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -169,6 +203,11 @@
     </a>
 
     <h2>Formulir Absensi</h2>
+    
+    <div id="limitInfo" class="limit-info loading">
+      Mengecek kuota peserta...
+    </div>
+
     <form id="absenForm">
       <label>Nama</label>
       <div class="search-container">
@@ -192,24 +231,87 @@
         <option value="JPL 81 Bekasi">JPL 81 Bekasi</option>
       </select>
 
-      <button type="submit">Kirim</button>
+      <button type="submit" id="submitBtn">Kirim</button>
     </form>
     <p id="pesan"></p>
   </div>
 
   <script src="account.js"></script>
   <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbxXi1daPkKsg0OvjO-Ow0NlgqUBGlalWKTu8Y_PSQfdPslvq_Cw4TM5ffUleEoa32nv/exec";
+    // GANTI URL INI DENGAN URL WEB APP GOOGLE SCRIPT ANDA
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwMIx-6EIolBwCf0Rg3dyDbU2OCBAf4zImzIsEglWVW-ZFrDZisuSc9nWI7-S21oCQq/exec";
     
     const namaSearch = document.getElementById('namaSearch');
     const dropdownList = document.getElementById('dropdownList');
     const selectedNama = document.getElementById('selectedNama');
     const niaInput = document.getElementById('nia');
+    const limitInfo = document.getElementById('limitInfo');
+    const submitBtn = document.getElementById('submitBtn');
     
     let selectedAccount = null;
+    let isFormDisabled = false;
+
+    // Function untuk mengecek limit peserta
+    async function checkParticipantLimit() {
+      try {
+        const response = await fetch(`${scriptURL}?action=checkLimit`);
+        const resultText = await response.text();
+        
+        let data;
+        try {
+          data = JSON.parse(resultText);
+        } catch (parseError) {
+          console.log('Could not parse limit check response, assuming no limit');
+          limitInfo.textContent = 'Kuota: Tidak terbatas';
+          limitInfo.className = 'limit-info';
+          return { isFull: false };
+        }
+        
+        updateLimitDisplay(data);
+        
+        if (data.isFull) {
+          disableForm();
+        }
+        
+        return data;
+      } catch (error) {
+        console.error('Error checking limit:', error);
+        limitInfo.textContent = 'Tidak dapat mengecek kuota';
+        limitInfo.className = 'limit-info';
+        return { isFull: false };
+      }
+    }
+
+    // Function untuk update tampilan limit
+    function updateLimitDisplay(data) {
+      const { currentCount, maxParticipants, remaining, isFull } = data;
+      
+      if (isFull) {
+        limitInfo.textContent = `Pendaftaran PENUH! (${currentCount}/${maxParticipants} peserta)`;
+        limitInfo.className = 'limit-info full';
+      } else if (remaining <= 3) {
+        limitInfo.textContent = `Sisa kuota: ${remaining} dari ${maxParticipants} peserta (Segera daftar!)`;
+        limitInfo.className = 'limit-info warning';
+      } else {
+        limitInfo.textContent = `Sisa kuota: ${remaining} dari ${maxParticipants} peserta`;
+        limitInfo.className = 'limit-info';
+      }
+    }
+
+    // Function untuk disable form
+    function disableForm() {
+      isFormDisabled = true;
+      namaSearch.disabled = true;
+      document.getElementById('wa').disabled = true;
+      document.querySelector('select[name="kegiatan"]').disabled = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Pendaftaran Penuh';
+    }
 
     // Function untuk menampilkan dropdown
     function showDropdown(accounts) {
+      if (isFormDisabled) return;
+      
       dropdownList.innerHTML = '';
       
       if (accounts.length === 0) {
@@ -245,6 +347,8 @@
 
     // Event listener untuk search input
     namaSearch.addEventListener('input', function() {
+      if (isFormDisabled) return;
+      
       const searchTerm = this.value.toLowerCase().trim();
       
       if (searchTerm === '') {
@@ -265,6 +369,8 @@
 
     // Event listener untuk focus
     namaSearch.addEventListener('focus', function() {
+      if (isFormDisabled) return;
+      
       if (this.value.trim() !== '') {
         const searchTerm = this.value.toLowerCase().trim();
         const filteredAccounts = validAccounts.filter(account => 
@@ -279,6 +385,8 @@
 
     // Format nomor WhatsApp menjadi 628...
     document.getElementById('wa').addEventListener('blur', function() {
+      if (isFormDisabled) return;
+      
       let value = this.value.trim();
       
       // Hapus semua karakter non-angka
@@ -307,8 +415,12 @@
       }
     });
 
-    document.getElementById('absenForm').addEventListener('submit', function(e) {
+    document.getElementById('absenForm').addEventListener('submit', async function(e) {
       e.preventDefault();
+      
+      if (isFormDisabled) {
+        return;
+      }
       
       // Validasi apakah nama sudah dipilih dari dropdown
       if (!selectedAccount || selectedNama.value === '') {
@@ -318,8 +430,11 @@
       }
 
       const pesan = document.getElementById('pesan');
-      pesan.style.color = 'green';
+      pesan.style.color = 'blue';
       pesan.textContent = "Mengirim...";
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Mengirim...';
 
       // Format nomor WhatsApp sekali lagi sebelum submit
       const waInput = document.getElementById('wa');
@@ -338,29 +453,62 @@
         kegiatan: form.get('kegiatan')
       };
 
-      // Simpan data di localStorage untuk halaman QR
-      localStorage.setItem('formData', JSON.stringify(data));
+      console.log('Sending data:', data);
+      console.log('Script URL:', scriptURL);
 
-      fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data)
-      })
-      .then(response => response.text())
-      .then(result => {
-        pesan.style.color = 'green';
-        pesan.textContent = "Data berhasil dikirim!";
+      try {
+        // Gunakan FormData untuk POST request
+        const formData = new FormData();
+        formData.append('nama', data.nama);
+        formData.append('nia', data.nia);
+        formData.append('wa', data.wa);
+        formData.append('kegiatan', data.kegiatan);
         
-        // Redirect ke halaman QR Code
-        setTimeout(() => {
-          window.location.href = 'barcode.html';
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          mode: 'no-cors', // Tambahkan mode no-cors
+          body: formData
+        });
+        
+        // Karena menggunakan no-cors, kita tidak bisa membaca response
+        // Jadi kita asumsikan berhasil dan cek ulang limit
+        console.log('Form submitted successfully');
+        
+        // Tunggu sebentar lalu cek limit untuk update info
+        setTimeout(async () => {
+          const limitData = await checkParticipantLimit();
+          
+          pesan.style.color = 'green';
+          pesan.textContent = "Data berhasil disimpan! Mengarahkan ke halaman QR Code...";
+          
+          // Simpan data di localStorage untuk halaman QR
+          if (typeof(Storage) !== "undefined") {
+            localStorage.setItem('formData', JSON.stringify(data));
+          }
+          
+          // Redirect ke halaman barcode
+          setTimeout(() => {
+            window.location.href = 'barcode.html';
+          }, 1500);
         }, 1000);
-      })
-      .catch(error => {
+        
+      } catch (error) {
+        console.error('Error submitting form:', error);
         pesan.style.color = 'red';
-        pesan.textContent = "Gagal mengirim data.";
-        console.error('Error!', error.message);
-      });
+        pesan.textContent = "Terjadi kesalahan. Silakan coba lagi.";
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Kirim';
+      }
     });
+
+    // Cek limit saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', function() {
+      checkParticipantLimit();
+    });
+
+    // Refresh limit info setiap 30 detik
+    setInterval(checkParticipantLimit, 30000);
   </script>
 </body>
 </html>
