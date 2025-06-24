@@ -216,7 +216,7 @@
     <div class="absensi-info">
       <strong>Kegiatan:</strong>Sosialisasi Disiplin Perlintasan<br>
       <br>
-      <strong>Lokasi:</strong>JPL 81 Bekasi<br>
+      <strong>Lokasi:</strong>JPL 30 Pasar Senen<br>
       <p><strong>Tanggal:</strong> <span id="tanggal-kegiatan"></span></p>
     </div>
    <div class="info-waktu">
@@ -233,10 +233,10 @@
 
   <script>
   // GANTI URL INI DENGAN URL WEB APP GOOGLE SCRIPT ANDA
-  const scriptURL = "https://script.google.com/macros/s/AKfycbw-bLmoNPRhQAS6RX5EMS8SrYGddV_xfO_aRt2d379WxtSZkwnl-LsaCRj_pT8cK_NT/exec"; // Replace with your actual GAS Web App URL
+  const scriptURL = "https://script.google.com/macros/s/AKfycby7OtSwsUFBsH-ouPy-rNUTXjR32pMdby5WWMlvaojm8JJCpeC-g34RRmY3jdXFNqJw/exec"; // Replace with your actual GAS Web App URL
 
   // Tanggal kegiatan dan tanggal absen dibuka (bisa beda)
-  const tanggalKegiatan = new Date("2025-06-14T15:00:00");
+  const tanggalKegiatan = new Date("2025-06-29T15:00:00");
   // Format tanggal kegiatan ke bahasa Indonesia
   const opsiFormat = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' };
   const teksTanggal = tanggalKegiatan.toLocaleDateString('id-ID', opsiFormat);
@@ -244,7 +244,7 @@
   // Masukkan ke elemen HTML
   document.getElementById("tanggal-kegiatan").innerText = teksTanggal;
 
-  const tanggalAbsenDibuka = new Date("2025-06-11T20:00:00");
+  const tanggalAbsenDibuka = new Date("2025-06-24T10:00:00");
   const sekarang = new Date();
 
   // Target URL
