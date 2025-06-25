@@ -51,6 +51,7 @@ const validAccounts = [
     { username: "Muhamad Fauzan", kta: "0174", password: "fauzan567" },
     { username: "Muhamad Fajri Ridho", kta: "0177", password: "fajri789" },
     { username: "Dimitri Setya", kta: "0180", password: "dimitri456" },
+    { username: "Dzakir Rafiqi Afkar", kta: "0183", password: "dzakir321" },
     { username: "Aldiko Araya", kta: "0188", password: "aldiko456" },
     { username: "Eliezer Clarence Nadek", kta: "0194", password: "eliezer234" },
     { username: "Adam Maliqi Saputra", kta: "0204", password: "adam567" },
