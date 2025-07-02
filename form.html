@@ -194,6 +194,79 @@
       color: #666;
       font-style: italic;
     }
+
+    /* Style untuk success message dan email verification */
+    .success-container {
+      display: none;
+      text-align: center;
+    }
+
+    .success-message {
+      background: #e8eef5;
+      border: 1px solid #4c81af;
+      color: #2e4f7d;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .email-check-link {
+      color: #2b7de9;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 14px;
+      margin-top: 10px;
+      display: inline-block;
+    }
+
+    .email-check-link:hover {
+      color: #1865d8;
+    }
+
+    .email-verification {
+      display: none;
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 15px;
+    }
+
+    .current-email {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      word-break: break-all;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .button-group button {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .continue-button {
+      background: #28a745;
+      margin-top: 20px;
+    }
+
+    .continue-button:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
@@ -204,42 +277,75 @@
 
     <h2>Formulir Absensi</h2>
     
-    <div id="limitInfo" class="limit-info loading">
-      Mengecek kuota peserta...
+    <!-- Form Container -->
+    <div id="formContainer">
+      <div id="limitInfo" class="limit-info loading">
+        Mengecek kuota peserta...
+      </div>
+
+      <form id="absenForm">
+        <label>Nama</label>
+        <div class="search-container">
+          <input type="text" id="namaSearch" placeholder="Ketik untuk mencari nama..." autocomplete="off" required>
+          <div id="dropdownList" class="dropdown-list"></div>
+          <input type="hidden" name="nama" id="selectedNama">
+        </div>
+        <div class="format-info"></div>
+
+        <label>NIA</label>
+        <input type="text" name="nia" id="nia" readonly required>
+        <div class="format-info">Akan terisi otomatis berdasarkan nama yang dipilih</div>
+
+        <label>Email</label>
+        <input type="email" name="email" id="email" required>
+        <div class="format-info">Contoh: nama@email.com</div>
+
+        <label>Kegiatan yang Anda hadiri</label>
+        <select name="kegiatan" required>
+          <option value="">-- Pilih Salah Satu --</option>
+          <option value="JPL 17 Kemayoran">JPL 17 Kemayoran</option>
+        </select>
+
+        <button type="submit" id="submitBtn">Kirim</button>
+      </form>
+      <p id="pesan"></p>
     </div>
 
-    <form id="absenForm">
-      <label>Nama</label>
-      <div class="search-container">
-        <input type="text" id="namaSearch" placeholder="Ketik untuk mencari nama..." autocomplete="off" required>
-        <div id="dropdownList" class="dropdown-list"></div>
-        <input type="hidden" name="nama" id="selectedNama">
+    <!-- Success Container -->
+    <div id="successContainer" class="success-container">
+      <div class="success-message">
+        <h3>✅ Data Berhasil Disimpan!</h3>
+        <p>Silakan cek email Anda untuk konfirmasi pendaftaran.</p>
+        <div class="email-check-link" onclick="showEmailVerification()">
+          Belum menerima email? Cek di bawah ini
+        </div>
       </div>
-      <div class="format-info"></div>
 
-      <label>NIA</label>
-      <input type="text" name="nia" id="nia" readonly required>
-      <div class="format-info">Akan terisi otomatis berdasarkan nama yang dipilih</div>
+      <!-- Email Verification Section -->
+      <div id="emailVerification" class="email-verification">
+        <h4>Verifikasi Email</h4>
+        <p><strong>Email yang terdaftar:</strong></p>
+        <div id="currentEmail" class="current-email"></div>
+        
+        <label>Email baru (jika ingin mengganti):</label>
+        <input type="email" id="newEmail" placeholder="Masukkan email yang benar">
+        
+        <div class="button-group">
+          <button type="button" class="btn-secondary" onclick="hideEmailVerification()">Batal</button>
+          <button type="button" onclick="updateEmail()">Perbarui Email</button>
+        </div>
+      </div>
 
-      <label>Nomor WhatsApp</label>
-      <input type="text" name="wa" id="wa" required>
-      <div class="format-info">Contoh: 628xxx</div>
-
-      <label>Kegiatan yang Anda hadiri</label>
-      <select name="kegiatan" required>
-        <option value="">-- Pilih Salah Satu --</option>
-        <option value="JPL 30 Pasar Senen">JPL 30 Pasar Senen</option>
-      </select>
-
-      <button type="submit" id="submitBtn">Kirim</button>
-    </form>
-    <p id="pesan"></p>
+      <button type="button" class="continue-button" onclick="goToIndex()">
+        Lanjut ke Halaman Utama
+      </button>
+    </div>
   </div>
 
   <script src="account.js"></script>
   <script>
     // GANTI URL INI DENGAN URL WEB APP GOOGLE SCRIPT ANDA
-    const scriptURL = "https://script.google.com/macros/s/AKfycby7OtSwsUFBsH-ouPy-rNUTXjR32pMdby5WWMlvaojm8JJCpeC-g34RRmY3jdXFNqJw/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbwrkSEcHuPz4XakaVsN0zVPXWZF87b8hh3XfLLvxq3l7FwyQR0BW3Hw4-YwhQaKsl_M/exec";
     
     const namaSearch = document.getElementById('namaSearch');
     const dropdownList = document.getElementById('dropdownList');
@@ -250,6 +356,7 @@
     
     let selectedAccount = null;
     let isFormDisabled = false;
+    let submittedData = null;
 
     // Function untuk mengecek limit peserta
     async function checkParticipantLimit() {
@@ -302,7 +409,7 @@
     function disableForm() {
       isFormDisabled = true;
       namaSearch.disabled = true;
-      document.getElementById('wa').disabled = true;
+      document.getElementById('email').disabled = true;
       document.querySelector('select[name="kegiatan"]').disabled = true;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Pendaftaran Penuh';
@@ -345,6 +452,85 @@
       dropdownList.style.display = 'none';
     }
 
+    // Function untuk menampilkan email verification
+    function showEmailVerification() {
+      document.getElementById('emailVerification').style.display = 'block';
+      document.getElementById('currentEmail').textContent = submittedData.email;
+      document.getElementById('newEmail').value = '';
+    }
+
+    // Function untuk menyembunyikan email verification
+    function hideEmailVerification() {
+      document.getElementById('emailVerification').style.display = 'none';
+    }
+
+    // Function untuk update email
+    async function updateEmail() {
+      const newEmail = document.getElementById('newEmail').value.trim();
+      
+      if (!newEmail) {
+        alert('Silakan masukkan email baru');
+        return;
+      }
+
+      if (!isValidEmail(newEmail)) {
+        alert('Format email tidak valid');
+        return;
+      }
+
+      // Update data
+      submittedData.email = newEmail;
+      
+      // Kirim update ke server
+      try {
+        const formData = new FormData();
+        formData.append('action', 'updateEmail');
+        formData.append('nama', submittedData.nama);
+        formData.append('nia', submittedData.nia);
+        formData.append('email', newEmail);
+        formData.append('kegiatan', submittedData.kegiatan);
+        
+        await fetch(scriptURL, {
+          method: 'POST',
+          mode: 'no-cors',
+          body: formData
+        });
+        
+        // Update tampilan
+        document.getElementById('currentEmail').textContent = newEmail;
+        document.getElementById('newEmail').value = '';
+        
+        // Update localStorage
+        if (typeof(Storage) !== "undefined") {
+          localStorage.setItem('formData', JSON.stringify(submittedData));
+        }
+        
+        alert('Email berhasil diperbarui! Silakan cek email baru Anda.');
+        hideEmailVerification();
+        
+      } catch (error) {
+        console.error('Error updating email:', error);
+        alert('Terjadi kesalahan saat memperbarui email. Silakan coba lagi.');
+      }
+    }
+
+    // Function untuk validasi email
+    function isValidEmail(email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(email);
+    }
+
+    // Function untuk pergi ke halaman index
+    function goToIndex() {
+      window.location.href = 'index.html';
+    }
+
+    // Function untuk menampilkan success container
+    function showSuccessContainer() {
+      document.getElementById('formContainer').style.display = 'none';
+      document.getElementById('successContainer').style.display = 'block';
+    }
+
     // Event listener untuk search input
     namaSearch.addEventListener('input', function() {
       if (isFormDisabled) return;
@@ -383,31 +569,6 @@
     // Event listener untuk blur
     namaSearch.addEventListener('blur', hideDropdown);
 
-    // Format nomor WhatsApp menjadi 628...
-    document.getElementById('wa').addEventListener('blur', function() {
-      if (isFormDisabled) return;
-      
-      let value = this.value.trim();
-      
-      // Hapus semua karakter non-angka
-      value = value.replace(/\D/g, '');
-      
-      // Jika dimulai dengan 0, ganti dengan 62
-      if (value.startsWith('0')) {
-        value = '62' + value.substring(1);
-      }
-      // Jika dimulai dengan 8, tambahkan 62
-      else if (value.startsWith('8')) {
-        value = '62' + value;
-      }
-      // Jika dimulai dengan +62, hapus + dan pastikan formatnya 62
-      else if (value.startsWith('62')) {
-        value = '62' + value.substring(2);
-      }
-      
-      this.value = value;
-    });
-
     // Close dropdown ketika klik di luar
     document.addEventListener('click', function(e) {
       if (!e.target.closest('.search-container')) {
@@ -436,22 +597,16 @@
       submitBtn.disabled = true;
       submitBtn.textContent = 'Mengirim...';
 
-      // Format nomor WhatsApp sekali lagi sebelum submit
-      const waInput = document.getElementById('wa');
-      let waValue = waInput.value.trim().replace(/\D/g, '');
-      if (waValue.startsWith('0')) {
-        waInput.value = '62' + waValue.substring(1);
-      } else if (!waValue.startsWith('62') && waValue.startsWith('8')) {
-        waInput.value = '62' + waValue;
-      }
-
       const form = new FormData(this);
       const data = {
         nama: form.get('nama'),
         nia: form.get('nia'),
-        wa: form.get('wa'),
+        email: form.get('email'),
         kegiatan: form.get('kegiatan')
       };
+
+      // Simpan data yang disubmit
+      submittedData = data;
 
       console.log('Sending data:', data);
       console.log('Script URL:', scriptURL);
@@ -461,35 +616,27 @@
         const formData = new FormData();
         formData.append('nama', data.nama);
         formData.append('nia', data.nia);
-        formData.append('wa', data.wa);
+        formData.append('email', data.email);
         formData.append('kegiatan', data.kegiatan);
         
         const response = await fetch(scriptURL, {
           method: 'POST',
-          mode: 'no-cors', // Tambahkan mode no-cors
+          mode: 'no-cors',
           body: formData
         });
         
-        // Karena menggunakan no-cors, kita tidak bisa membaca response
-        // Jadi kita asumsikan berhasil dan cek ulang limit
         console.log('Form submitted successfully');
         
-        // Tunggu sebentar lalu cek limit untuk update info
-        setTimeout(async () => {
-          const limitData = await checkParticipantLimit();
-          
-          pesan.style.color = 'green';
-          pesan.textContent = "Data berhasil disimpan! Mengarahkan ke halaman QR Code...";
-          
-          // Simpan data di localStorage untuk halaman QR
-          if (typeof(Storage) !== "undefined") {
-            localStorage.setItem('formData', JSON.stringify(data));
-          }
-          
-          // Redirect ke halaman barcode
-          setTimeout(() => {
-            window.location.href = 'barcode.html';
-          }, 1500);
+        // Simpan data di localStorage untuk halaman QR
+        if (typeof(Storage) !== "undefined") {
+          localStorage.setItem('formData', JSON.stringify(data));
+        }
+        
+        // Tunggu sebentar lalu tampilkan success container
+        setTimeout(() => {
+          showSuccessContainer();
+          // Cek limit untuk update info
+          checkParticipantLimit();
         }, 1000);
         
       } catch (error) {
